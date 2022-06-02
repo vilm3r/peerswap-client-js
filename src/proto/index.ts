@@ -9,7 +9,7 @@ const options = {
   oneofs: true,
 };
 
-const proto = loadPackageDefinition(loadSync(join(__dirname, '../../src/proto/ps.proto'), options));
+const proto = loadPackageDefinition(loadSync(join(__dirname, './ps.proto'), options));
 
 interface PeerSwapConfig {
   socket?: string;

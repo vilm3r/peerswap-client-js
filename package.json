@@ -1,6 +1,6 @@
 {
   "name": "@vilm3r/peerswap-client",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "peerswap client library",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -9,7 +9,7 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",
     "start": "ts-node src/index.ts",
-    "build": "tsc",
+    "build": "rm -rf lib/ && tsc && cp ./src/proto/ps.proto ./lib/proto/",
     "proto": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=. --ts_proto_opt=onlyTypes=true ./src/proto/ps.proto"
   },
   "author": "vilm3r",
