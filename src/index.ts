@@ -1,15 +1,5 @@
-import {
-  swapOut,
-  swapIn,
-  getSwap,
-  listSwaps,
-  listPeers,
-  listNodes,
-  listRequestedSwaps,
-  listActiveSwaps,
-  allowSwapRequests,
-} from './peerswap';
-import { reloadPolicyFile, addPeer, removePeer } from './policy';
+import { swapOut, swapIn, getSwap, listSwaps, listPeers, listRequestedSwaps, listActiveSwaps } from './peerswap';
+import { reloadPolicyFile, addPeer, removePeer, allowSwapRequests, addSusPeer, removeSusPeer } from './policy';
 import { liquidGetAddress, liquidGetBalance, liquidSendToAddress } from './liquid';
 import { getPeerSwapClient } from './proto';
 
@@ -20,13 +10,14 @@ export {
   getSwap,
   listSwaps,
   listPeers,
-  listNodes,
   listRequestedSwaps,
   listActiveSwaps,
   allowSwapRequests,
   reloadPolicyFile,
   addPeer,
   removePeer,
+  addSusPeer,
+  removeSusPeer,
   liquidGetAddress,
   liquidGetBalance,
   liquidSendToAddress,

@@ -1,4 +1,4 @@
-/* tslint:disable */
+/* eslint-disable */
 import * as Long from 'long';
 import * as _m0 from 'protobufjs/minimal';
 
@@ -29,6 +29,7 @@ export interface SwapOutRequest {
   channelId: number;
   swapAmount: number;
   asset: string;
+  force: boolean;
 }
 
 export interface SwapOutResponse {
@@ -39,6 +40,7 @@ export interface SwapInRequest {
   channelId: number;
   swapAmount: number;
   asset: string;
+  force: boolean;
 }
 
 export interface SwapResponse {
@@ -61,32 +63,14 @@ export interface ListPeersResponse {
   peers: PeerSwapPeer[];
 }
 
-export interface ListNodesRequest {}
-
-export interface ListNodesResponse {
-  nodes: PeerSwapNodes[];
-}
-
 export interface ReloadPolicyFileRequest {}
-
-export interface ReloadPolicyFileResponse {
-  policy: Policy | undefined;
-}
 
 export interface AddPeerRequest {
   peerPubkey: string;
 }
 
-export interface AddPeerResponse {
-  policy: Policy | undefined;
-}
-
 export interface RemovePeerRequest {
   peerPubkey: string;
-}
-
-export interface RemovePeerResponse {
-  policy: Policy | undefined;
 }
 
 export interface ListRequestedSwapsRequest {}
@@ -146,7 +130,8 @@ export function requestedSwap_SwapTypeToJSON(object: RequestedSwap_SwapType): st
 
 export interface PrettyPrintSwap {
   id: string;
-  createdAt: string;
+  createdAt: number;
+  asset: string;
   type: string;
   role: string;
   state: string;
@@ -157,6 +142,7 @@ export interface PrettyPrintSwap {
   openingTxId: string;
   claimTxId: string;
   cancelMessage: string;
+  lndChanId: number;
 }
 
 export interface PeerSwapPeer {
@@ -190,12 +176,15 @@ export interface PeerSwapNodes {
 
 export interface Policy {
   reserveOnchainMsat: number;
+  minSwapAmountMsat: number;
   acceptAllPeers: boolean;
-  peerAllowList: string[];
+  allowNewSwaps: boolean;
+  allowlistedPeers: string[];
+  suspiciousPeerList: string[];
 }
 
 export interface AllowSwapRequestsRequest {
-  allow: string;
+  allow: boolean;
 }
 
 export interface AllowSwapRequestsResponse {
@@ -488,7 +477,7 @@ export const SendToAddressResponse = {
 };
 
 function createBaseSwapOutRequest(): SwapOutRequest {
-  return { channelId: 0, swapAmount: 0, asset: '' };
+  return { channelId: 0, swapAmount: 0, asset: '', force: false };
 }
 
 export const SwapOutRequest = {
@@ -501,6 +490,9 @@ export const SwapOutRequest = {
     }
     if (message.asset !== '') {
       writer.uint32(26).string(message.asset);
+    }
+    if (message.force === true) {
+      writer.uint32(32).bool(message.force);
     }
     return writer;
   },
@@ -521,6 +513,9 @@ export const SwapOutRequest = {
         case 3:
           message.asset = reader.string();
           break;
+        case 4:
+          message.force = reader.bool();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -534,6 +529,7 @@ export const SwapOutRequest = {
       channelId: isSet(object.channelId) ? Number(object.channelId) : 0,
       swapAmount: isSet(object.swapAmount) ? Number(object.swapAmount) : 0,
       asset: isSet(object.asset) ? String(object.asset) : '',
+      force: isSet(object.force) ? Boolean(object.force) : false,
     };
   },
 
@@ -542,6 +538,7 @@ export const SwapOutRequest = {
     message.channelId !== undefined && (obj.channelId = Math.round(message.channelId));
     message.swapAmount !== undefined && (obj.swapAmount = Math.round(message.swapAmount));
     message.asset !== undefined && (obj.asset = message.asset);
+    message.force !== undefined && (obj.force = message.force);
     return obj;
   },
 
@@ -550,6 +547,7 @@ export const SwapOutRequest = {
     message.channelId = object.channelId ?? 0;
     message.swapAmount = object.swapAmount ?? 0;
     message.asset = object.asset ?? '';
+    message.force = object.force ?? false;
     return message;
   },
 };
@@ -605,7 +603,7 @@ export const SwapOutResponse = {
 };
 
 function createBaseSwapInRequest(): SwapInRequest {
-  return { channelId: 0, swapAmount: 0, asset: '' };
+  return { channelId: 0, swapAmount: 0, asset: '', force: false };
 }
 
 export const SwapInRequest = {
@@ -618,6 +616,9 @@ export const SwapInRequest = {
     }
     if (message.asset !== '') {
       writer.uint32(26).string(message.asset);
+    }
+    if (message.force === true) {
+      writer.uint32(32).bool(message.force);
     }
     return writer;
   },
@@ -638,6 +639,9 @@ export const SwapInRequest = {
         case 3:
           message.asset = reader.string();
           break;
+        case 4:
+          message.force = reader.bool();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -651,6 +655,7 @@ export const SwapInRequest = {
       channelId: isSet(object.channelId) ? Number(object.channelId) : 0,
       swapAmount: isSet(object.swapAmount) ? Number(object.swapAmount) : 0,
       asset: isSet(object.asset) ? String(object.asset) : '',
+      force: isSet(object.force) ? Boolean(object.force) : false,
     };
   },
 
@@ -659,6 +664,7 @@ export const SwapInRequest = {
     message.channelId !== undefined && (obj.channelId = Math.round(message.channelId));
     message.swapAmount !== undefined && (obj.swapAmount = Math.round(message.swapAmount));
     message.asset !== undefined && (obj.asset = message.asset);
+    message.force !== undefined && (obj.force = message.force);
     return obj;
   },
 
@@ -667,6 +673,7 @@ export const SwapInRequest = {
     message.channelId = object.channelId ?? 0;
     message.swapAmount = object.swapAmount ?? 0;
     message.asset = object.asset ?? '';
+    message.force = object.force ?? false;
     return message;
   },
 };
@@ -954,98 +961,6 @@ export const ListPeersResponse = {
   },
 };
 
-function createBaseListNodesRequest(): ListNodesRequest {
-  return {};
-}
-
-export const ListNodesRequest = {
-  encode(_: ListNodesRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): ListNodesRequest {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseListNodesRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(_: any): ListNodesRequest {
-    return {};
-  },
-
-  toJSON(_: ListNodesRequest): unknown {
-    const obj: any = {};
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<ListNodesRequest>, I>>(_: I): ListNodesRequest {
-    const message = createBaseListNodesRequest();
-    return message;
-  },
-};
-
-function createBaseListNodesResponse(): ListNodesResponse {
-  return { nodes: [] };
-}
-
-export const ListNodesResponse = {
-  encode(message: ListNodesResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    for (const v of message.nodes) {
-      PeerSwapNodes.encode(v!, writer.uint32(10).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): ListNodesResponse {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseListNodesResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.nodes.push(PeerSwapNodes.decode(reader, reader.uint32()));
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): ListNodesResponse {
-    return {
-      nodes: Array.isArray(object?.nodes) ? object.nodes.map((e: any) => PeerSwapNodes.fromJSON(e)) : [],
-    };
-  },
-
-  toJSON(message: ListNodesResponse): unknown {
-    const obj: any = {};
-    if (message.nodes) {
-      obj.nodes = message.nodes.map((e) => (e ? PeerSwapNodes.toJSON(e) : undefined));
-    } else {
-      obj.nodes = [];
-    }
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<ListNodesResponse>, I>>(object: I): ListNodesResponse {
-    const message = createBaseListNodesResponse();
-    message.nodes = object.nodes?.map((e) => PeerSwapNodes.fromPartial(e)) || [];
-    return message;
-  },
-};
-
 function createBaseReloadPolicyFileRequest(): ReloadPolicyFileRequest {
   return {};
 }
@@ -1081,56 +996,6 @@ export const ReloadPolicyFileRequest = {
 
   fromPartial<I extends Exact<DeepPartial<ReloadPolicyFileRequest>, I>>(_: I): ReloadPolicyFileRequest {
     const message = createBaseReloadPolicyFileRequest();
-    return message;
-  },
-};
-
-function createBaseReloadPolicyFileResponse(): ReloadPolicyFileResponse {
-  return { policy: undefined };
-}
-
-export const ReloadPolicyFileResponse = {
-  encode(message: ReloadPolicyFileResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.policy !== undefined) {
-      Policy.encode(message.policy, writer.uint32(10).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): ReloadPolicyFileResponse {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseReloadPolicyFileResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.policy = Policy.decode(reader, reader.uint32());
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): ReloadPolicyFileResponse {
-    return {
-      policy: isSet(object.policy) ? Policy.fromJSON(object.policy) : undefined,
-    };
-  },
-
-  toJSON(message: ReloadPolicyFileResponse): unknown {
-    const obj: any = {};
-    message.policy !== undefined && (obj.policy = message.policy ? Policy.toJSON(message.policy) : undefined);
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<ReloadPolicyFileResponse>, I>>(object: I): ReloadPolicyFileResponse {
-    const message = createBaseReloadPolicyFileResponse();
-    message.policy =
-      object.policy !== undefined && object.policy !== null ? Policy.fromPartial(object.policy) : undefined;
     return message;
   },
 };
@@ -1184,56 +1049,6 @@ export const AddPeerRequest = {
   },
 };
 
-function createBaseAddPeerResponse(): AddPeerResponse {
-  return { policy: undefined };
-}
-
-export const AddPeerResponse = {
-  encode(message: AddPeerResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.policy !== undefined) {
-      Policy.encode(message.policy, writer.uint32(10).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): AddPeerResponse {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseAddPeerResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.policy = Policy.decode(reader, reader.uint32());
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): AddPeerResponse {
-    return {
-      policy: isSet(object.policy) ? Policy.fromJSON(object.policy) : undefined,
-    };
-  },
-
-  toJSON(message: AddPeerResponse): unknown {
-    const obj: any = {};
-    message.policy !== undefined && (obj.policy = message.policy ? Policy.toJSON(message.policy) : undefined);
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<AddPeerResponse>, I>>(object: I): AddPeerResponse {
-    const message = createBaseAddPeerResponse();
-    message.policy =
-      object.policy !== undefined && object.policy !== null ? Policy.fromPartial(object.policy) : undefined;
-    return message;
-  },
-};
-
 function createBaseRemovePeerRequest(): RemovePeerRequest {
   return { peerPubkey: '' };
 }
@@ -1279,56 +1094,6 @@ export const RemovePeerRequest = {
   fromPartial<I extends Exact<DeepPartial<RemovePeerRequest>, I>>(object: I): RemovePeerRequest {
     const message = createBaseRemovePeerRequest();
     message.peerPubkey = object.peerPubkey ?? '';
-    return message;
-  },
-};
-
-function createBaseRemovePeerResponse(): RemovePeerResponse {
-  return { policy: undefined };
-}
-
-export const RemovePeerResponse = {
-  encode(message: RemovePeerResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.policy !== undefined) {
-      Policy.encode(message.policy, writer.uint32(10).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): RemovePeerResponse {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseRemovePeerResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.policy = Policy.decode(reader, reader.uint32());
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): RemovePeerResponse {
-    return {
-      policy: isSet(object.policy) ? Policy.fromJSON(object.policy) : undefined,
-    };
-  },
-
-  toJSON(message: RemovePeerResponse): unknown {
-    const obj: any = {};
-    message.policy !== undefined && (obj.policy = message.policy ? Policy.toJSON(message.policy) : undefined);
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<RemovePeerResponse>, I>>(object: I): RemovePeerResponse {
-    const message = createBaseRemovePeerResponse();
-    message.policy =
-      object.policy !== undefined && object.policy !== null ? Policy.fromPartial(object.policy) : undefined;
     return message;
   },
 };
@@ -1643,7 +1408,8 @@ export const RequestedSwap = {
 function createBasePrettyPrintSwap(): PrettyPrintSwap {
   return {
     id: '',
-    createdAt: '',
+    createdAt: 0,
+    asset: '',
     type: '',
     role: '',
     state: '',
@@ -1654,6 +1420,7 @@ function createBasePrettyPrintSwap(): PrettyPrintSwap {
     openingTxId: '',
     claimTxId: '',
     cancelMessage: '',
+    lndChanId: 0,
   };
 }
 
@@ -1662,38 +1429,44 @@ export const PrettyPrintSwap = {
     if (message.id !== '') {
       writer.uint32(10).string(message.id);
     }
-    if (message.createdAt !== '') {
-      writer.uint32(18).string(message.createdAt);
+    if (message.createdAt !== 0) {
+      writer.uint32(16).int64(message.createdAt);
+    }
+    if (message.asset !== '') {
+      writer.uint32(26).string(message.asset);
     }
     if (message.type !== '') {
-      writer.uint32(26).string(message.type);
+      writer.uint32(34).string(message.type);
     }
     if (message.role !== '') {
-      writer.uint32(34).string(message.role);
+      writer.uint32(42).string(message.role);
     }
     if (message.state !== '') {
-      writer.uint32(42).string(message.state);
+      writer.uint32(50).string(message.state);
     }
     if (message.initiatorNodeId !== '') {
-      writer.uint32(50).string(message.initiatorNodeId);
+      writer.uint32(58).string(message.initiatorNodeId);
     }
     if (message.peerNodeId !== '') {
-      writer.uint32(58).string(message.peerNodeId);
+      writer.uint32(66).string(message.peerNodeId);
     }
     if (message.amount !== 0) {
-      writer.uint32(64).uint64(message.amount);
+      writer.uint32(72).uint64(message.amount);
     }
     if (message.channelId !== '') {
-      writer.uint32(74).string(message.channelId);
+      writer.uint32(82).string(message.channelId);
     }
     if (message.openingTxId !== '') {
-      writer.uint32(82).string(message.openingTxId);
+      writer.uint32(90).string(message.openingTxId);
     }
     if (message.claimTxId !== '') {
-      writer.uint32(90).string(message.claimTxId);
+      writer.uint32(98).string(message.claimTxId);
     }
     if (message.cancelMessage !== '') {
-      writer.uint32(98).string(message.cancelMessage);
+      writer.uint32(106).string(message.cancelMessage);
+    }
+    if (message.lndChanId !== 0) {
+      writer.uint32(112).uint64(message.lndChanId);
     }
     return writer;
   },
@@ -1709,37 +1482,43 @@ export const PrettyPrintSwap = {
           message.id = reader.string();
           break;
         case 2:
-          message.createdAt = reader.string();
+          message.createdAt = longToNumber(reader.int64() as Long);
           break;
         case 3:
-          message.type = reader.string();
+          message.asset = reader.string();
           break;
         case 4:
-          message.role = reader.string();
+          message.type = reader.string();
           break;
         case 5:
-          message.state = reader.string();
+          message.role = reader.string();
           break;
         case 6:
-          message.initiatorNodeId = reader.string();
+          message.state = reader.string();
           break;
         case 7:
-          message.peerNodeId = reader.string();
+          message.initiatorNodeId = reader.string();
           break;
         case 8:
-          message.amount = longToNumber(reader.uint64() as Long);
+          message.peerNodeId = reader.string();
           break;
         case 9:
-          message.channelId = reader.string();
+          message.amount = longToNumber(reader.uint64() as Long);
           break;
         case 10:
-          message.openingTxId = reader.string();
+          message.channelId = reader.string();
           break;
         case 11:
-          message.claimTxId = reader.string();
+          message.openingTxId = reader.string();
           break;
         case 12:
+          message.claimTxId = reader.string();
+          break;
+        case 13:
           message.cancelMessage = reader.string();
+          break;
+        case 14:
+          message.lndChanId = longToNumber(reader.uint64() as Long);
           break;
         default:
           reader.skipType(tag & 7);
@@ -1752,7 +1531,8 @@ export const PrettyPrintSwap = {
   fromJSON(object: any): PrettyPrintSwap {
     return {
       id: isSet(object.id) ? String(object.id) : '',
-      createdAt: isSet(object.createdAt) ? String(object.createdAt) : '',
+      createdAt: isSet(object.createdAt) ? Number(object.createdAt) : 0,
+      asset: isSet(object.asset) ? String(object.asset) : '',
       type: isSet(object.type) ? String(object.type) : '',
       role: isSet(object.role) ? String(object.role) : '',
       state: isSet(object.state) ? String(object.state) : '',
@@ -1763,13 +1543,15 @@ export const PrettyPrintSwap = {
       openingTxId: isSet(object.openingTxId) ? String(object.openingTxId) : '',
       claimTxId: isSet(object.claimTxId) ? String(object.claimTxId) : '',
       cancelMessage: isSet(object.cancelMessage) ? String(object.cancelMessage) : '',
+      lndChanId: isSet(object.lndChanId) ? Number(object.lndChanId) : 0,
     };
   },
 
   toJSON(message: PrettyPrintSwap): unknown {
     const obj: any = {};
     message.id !== undefined && (obj.id = message.id);
-    message.createdAt !== undefined && (obj.createdAt = message.createdAt);
+    message.createdAt !== undefined && (obj.createdAt = Math.round(message.createdAt));
+    message.asset !== undefined && (obj.asset = message.asset);
     message.type !== undefined && (obj.type = message.type);
     message.role !== undefined && (obj.role = message.role);
     message.state !== undefined && (obj.state = message.state);
@@ -1780,13 +1562,15 @@ export const PrettyPrintSwap = {
     message.openingTxId !== undefined && (obj.openingTxId = message.openingTxId);
     message.claimTxId !== undefined && (obj.claimTxId = message.claimTxId);
     message.cancelMessage !== undefined && (obj.cancelMessage = message.cancelMessage);
+    message.lndChanId !== undefined && (obj.lndChanId = Math.round(message.lndChanId));
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<PrettyPrintSwap>, I>>(object: I): PrettyPrintSwap {
     const message = createBasePrettyPrintSwap();
     message.id = object.id ?? '';
-    message.createdAt = object.createdAt ?? '';
+    message.createdAt = object.createdAt ?? 0;
+    message.asset = object.asset ?? '';
     message.type = object.type ?? '';
     message.role = object.role ?? '';
     message.state = object.state ?? '';
@@ -1797,6 +1581,7 @@ export const PrettyPrintSwap = {
     message.openingTxId = object.openingTxId ?? '';
     message.claimTxId = object.claimTxId ?? '';
     message.cancelMessage = object.cancelMessage ?? '';
+    message.lndChanId = object.lndChanId ?? 0;
     return message;
   },
 };
@@ -2137,7 +1922,14 @@ export const PeerSwapNodes = {
 };
 
 function createBasePolicy(): Policy {
-  return { reserveOnchainMsat: 0, acceptAllPeers: false, peerAllowList: [] };
+  return {
+    reserveOnchainMsat: 0,
+    minSwapAmountMsat: 0,
+    acceptAllPeers: false,
+    allowNewSwaps: false,
+    allowlistedPeers: [],
+    suspiciousPeerList: [],
+  };
 }
 
 export const Policy = {
@@ -2145,11 +1937,20 @@ export const Policy = {
     if (message.reserveOnchainMsat !== 0) {
       writer.uint32(8).uint64(message.reserveOnchainMsat);
     }
-    if (message.acceptAllPeers === true) {
-      writer.uint32(16).bool(message.acceptAllPeers);
+    if (message.minSwapAmountMsat !== 0) {
+      writer.uint32(16).uint64(message.minSwapAmountMsat);
     }
-    for (const v of message.peerAllowList) {
-      writer.uint32(26).string(v!);
+    if (message.acceptAllPeers === true) {
+      writer.uint32(24).bool(message.acceptAllPeers);
+    }
+    if (message.allowNewSwaps === true) {
+      writer.uint32(32).bool(message.allowNewSwaps);
+    }
+    for (const v of message.allowlistedPeers) {
+      writer.uint32(42).string(v!);
+    }
+    for (const v of message.suspiciousPeerList) {
+      writer.uint32(50).string(v!);
     }
     return writer;
   },
@@ -2165,10 +1966,19 @@ export const Policy = {
           message.reserveOnchainMsat = longToNumber(reader.uint64() as Long);
           break;
         case 2:
-          message.acceptAllPeers = reader.bool();
+          message.minSwapAmountMsat = longToNumber(reader.uint64() as Long);
           break;
         case 3:
-          message.peerAllowList.push(reader.string());
+          message.acceptAllPeers = reader.bool();
+          break;
+        case 4:
+          message.allowNewSwaps = reader.bool();
+          break;
+        case 5:
+          message.allowlistedPeers.push(reader.string());
+          break;
+        case 6:
+          message.suspiciousPeerList.push(reader.string());
           break;
         default:
           reader.skipType(tag & 7);
@@ -2181,19 +1991,33 @@ export const Policy = {
   fromJSON(object: any): Policy {
     return {
       reserveOnchainMsat: isSet(object.reserveOnchainMsat) ? Number(object.reserveOnchainMsat) : 0,
+      minSwapAmountMsat: isSet(object.minSwapAmountMsat) ? Number(object.minSwapAmountMsat) : 0,
       acceptAllPeers: isSet(object.acceptAllPeers) ? Boolean(object.acceptAllPeers) : false,
-      peerAllowList: Array.isArray(object?.peerAllowList) ? object.peerAllowList.map((e: any) => String(e)) : [],
+      allowNewSwaps: isSet(object.allowNewSwaps) ? Boolean(object.allowNewSwaps) : false,
+      allowlistedPeers: Array.isArray(object?.allowlistedPeers)
+        ? object.allowlistedPeers.map((e: any) => String(e))
+        : [],
+      suspiciousPeerList: Array.isArray(object?.suspiciousPeerList)
+        ? object.suspiciousPeerList.map((e: any) => String(e))
+        : [],
     };
   },
 
   toJSON(message: Policy): unknown {
     const obj: any = {};
     message.reserveOnchainMsat !== undefined && (obj.reserveOnchainMsat = Math.round(message.reserveOnchainMsat));
+    message.minSwapAmountMsat !== undefined && (obj.minSwapAmountMsat = Math.round(message.minSwapAmountMsat));
     message.acceptAllPeers !== undefined && (obj.acceptAllPeers = message.acceptAllPeers);
-    if (message.peerAllowList) {
-      obj.peerAllowList = message.peerAllowList.map((e) => e);
+    message.allowNewSwaps !== undefined && (obj.allowNewSwaps = message.allowNewSwaps);
+    if (message.allowlistedPeers) {
+      obj.allowlistedPeers = message.allowlistedPeers.map((e) => e);
     } else {
-      obj.peerAllowList = [];
+      obj.allowlistedPeers = [];
+    }
+    if (message.suspiciousPeerList) {
+      obj.suspiciousPeerList = message.suspiciousPeerList.map((e) => e);
+    } else {
+      obj.suspiciousPeerList = [];
     }
     return obj;
   },
@@ -2201,20 +2025,23 @@ export const Policy = {
   fromPartial<I extends Exact<DeepPartial<Policy>, I>>(object: I): Policy {
     const message = createBasePolicy();
     message.reserveOnchainMsat = object.reserveOnchainMsat ?? 0;
+    message.minSwapAmountMsat = object.minSwapAmountMsat ?? 0;
     message.acceptAllPeers = object.acceptAllPeers ?? false;
-    message.peerAllowList = object.peerAllowList?.map((e) => e) || [];
+    message.allowNewSwaps = object.allowNewSwaps ?? false;
+    message.allowlistedPeers = object.allowlistedPeers?.map((e) => e) || [];
+    message.suspiciousPeerList = object.suspiciousPeerList?.map((e) => e) || [];
     return message;
   },
 };
 
 function createBaseAllowSwapRequestsRequest(): AllowSwapRequestsRequest {
-  return { allow: '' };
+  return { allow: false };
 }
 
 export const AllowSwapRequestsRequest = {
   encode(message: AllowSwapRequestsRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.allow !== '') {
-      writer.uint32(10).string(message.allow);
+    if (message.allow === true) {
+      writer.uint32(8).bool(message.allow);
     }
     return writer;
   },
@@ -2227,7 +2054,7 @@ export const AllowSwapRequestsRequest = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.allow = reader.string();
+          message.allow = reader.bool();
           break;
         default:
           reader.skipType(tag & 7);
@@ -2239,7 +2066,7 @@ export const AllowSwapRequestsRequest = {
 
   fromJSON(object: any): AllowSwapRequestsRequest {
     return {
-      allow: isSet(object.allow) ? String(object.allow) : '',
+      allow: isSet(object.allow) ? Boolean(object.allow) : false,
     };
   },
 
@@ -2251,7 +2078,7 @@ export const AllowSwapRequestsRequest = {
 
   fromPartial<I extends Exact<DeepPartial<AllowSwapRequestsRequest>, I>>(object: I): AllowSwapRequestsRequest {
     const message = createBaseAllowSwapRequestsRequest();
-    message.allow = object.allow ?? '';
+    message.allow = object.allow ?? false;
     return message;
   },
 };
@@ -2350,14 +2177,15 @@ export interface PeerSwap {
   GetSwap(request: GetSwapRequest): Promise<SwapResponse>;
   ListSwaps(request: ListSwapsRequest): Promise<ListSwapsResponse>;
   ListPeers(request: ListPeersRequest): Promise<ListPeersResponse>;
-  ListNodes(request: ListNodesRequest): Promise<ListNodesResponse>;
   ListRequestedSwaps(request: ListRequestedSwapsRequest): Promise<ListRequestedSwapsResponse>;
   ListActiveSwaps(request: ListSwapsRequest): Promise<ListSwapsResponse>;
-  AllowSwapRequests(request: AllowSwapRequestsRequest): Promise<AllowSwapRequestsResponse>;
   /** policy */
-  ReloadPolicyFile(request: ReloadPolicyFileRequest): Promise<ReloadPolicyFileResponse>;
-  AddPeer(request: AddPeerRequest): Promise<AddPeerResponse>;
-  RemovePeer(request: RemovePeerRequest): Promise<RemovePeerResponse>;
+  AllowSwapRequests(request: AllowSwapRequestsRequest): Promise<Policy>;
+  ReloadPolicyFile(request: ReloadPolicyFileRequest): Promise<Policy>;
+  AddPeer(request: AddPeerRequest): Promise<Policy>;
+  RemovePeer(request: RemovePeerRequest): Promise<Policy>;
+  AddSusPeer(request: AddPeerRequest): Promise<Policy>;
+  RemoveSusPeer(request: RemovePeerRequest): Promise<Policy>;
   /** Liquid Stuff */
   LiquidGetAddress(request: GetAddressRequest): Promise<GetAddressResponse>;
   LiquidGetBalance(request: GetBalanceRequest): Promise<GetBalanceResponse>;
@@ -2374,13 +2202,14 @@ export class PeerSwapClientImpl implements PeerSwap {
     this.GetSwap = this.GetSwap.bind(this);
     this.ListSwaps = this.ListSwaps.bind(this);
     this.ListPeers = this.ListPeers.bind(this);
-    this.ListNodes = this.ListNodes.bind(this);
     this.ListRequestedSwaps = this.ListRequestedSwaps.bind(this);
     this.ListActiveSwaps = this.ListActiveSwaps.bind(this);
     this.AllowSwapRequests = this.AllowSwapRequests.bind(this);
     this.ReloadPolicyFile = this.ReloadPolicyFile.bind(this);
     this.AddPeer = this.AddPeer.bind(this);
     this.RemovePeer = this.RemovePeer.bind(this);
+    this.AddSusPeer = this.AddSusPeer.bind(this);
+    this.RemoveSusPeer = this.RemoveSusPeer.bind(this);
     this.LiquidGetAddress = this.LiquidGetAddress.bind(this);
     this.LiquidGetBalance = this.LiquidGetBalance.bind(this);
     this.LiquidSendToAddress = this.LiquidSendToAddress.bind(this);
@@ -2416,12 +2245,6 @@ export class PeerSwapClientImpl implements PeerSwap {
     return promise.then((data) => ListPeersResponse.decode(new _m0.Reader(data)));
   }
 
-  ListNodes(request: ListNodesRequest): Promise<ListNodesResponse> {
-    const data = ListNodesRequest.encode(request).finish();
-    const promise = this.rpc.request('peerswap.PeerSwap', 'ListNodes', data);
-    return promise.then((data) => ListNodesResponse.decode(new _m0.Reader(data)));
-  }
-
   ListRequestedSwaps(request: ListRequestedSwapsRequest): Promise<ListRequestedSwapsResponse> {
     const data = ListRequestedSwapsRequest.encode(request).finish();
     const promise = this.rpc.request('peerswap.PeerSwap', 'ListRequestedSwaps', data);
@@ -2434,28 +2257,40 @@ export class PeerSwapClientImpl implements PeerSwap {
     return promise.then((data) => ListSwapsResponse.decode(new _m0.Reader(data)));
   }
 
-  AllowSwapRequests(request: AllowSwapRequestsRequest): Promise<AllowSwapRequestsResponse> {
+  AllowSwapRequests(request: AllowSwapRequestsRequest): Promise<Policy> {
     const data = AllowSwapRequestsRequest.encode(request).finish();
     const promise = this.rpc.request('peerswap.PeerSwap', 'AllowSwapRequests', data);
-    return promise.then((data) => AllowSwapRequestsResponse.decode(new _m0.Reader(data)));
+    return promise.then((data) => Policy.decode(new _m0.Reader(data)));
   }
 
-  ReloadPolicyFile(request: ReloadPolicyFileRequest): Promise<ReloadPolicyFileResponse> {
+  ReloadPolicyFile(request: ReloadPolicyFileRequest): Promise<Policy> {
     const data = ReloadPolicyFileRequest.encode(request).finish();
     const promise = this.rpc.request('peerswap.PeerSwap', 'ReloadPolicyFile', data);
-    return promise.then((data) => ReloadPolicyFileResponse.decode(new _m0.Reader(data)));
+    return promise.then((data) => Policy.decode(new _m0.Reader(data)));
   }
 
-  AddPeer(request: AddPeerRequest): Promise<AddPeerResponse> {
+  AddPeer(request: AddPeerRequest): Promise<Policy> {
     const data = AddPeerRequest.encode(request).finish();
     const promise = this.rpc.request('peerswap.PeerSwap', 'AddPeer', data);
-    return promise.then((data) => AddPeerResponse.decode(new _m0.Reader(data)));
+    return promise.then((data) => Policy.decode(new _m0.Reader(data)));
   }
 
-  RemovePeer(request: RemovePeerRequest): Promise<RemovePeerResponse> {
+  RemovePeer(request: RemovePeerRequest): Promise<Policy> {
     const data = RemovePeerRequest.encode(request).finish();
     const promise = this.rpc.request('peerswap.PeerSwap', 'RemovePeer', data);
-    return promise.then((data) => RemovePeerResponse.decode(new _m0.Reader(data)));
+    return promise.then((data) => Policy.decode(new _m0.Reader(data)));
+  }
+
+  AddSusPeer(request: AddPeerRequest): Promise<Policy> {
+    const data = AddPeerRequest.encode(request).finish();
+    const promise = this.rpc.request('peerswap.PeerSwap', 'AddSusPeer', data);
+    return promise.then((data) => Policy.decode(new _m0.Reader(data)));
+  }
+
+  RemoveSusPeer(request: RemovePeerRequest): Promise<Policy> {
+    const data = RemovePeerRequest.encode(request).finish();
+    const promise = this.rpc.request('peerswap.PeerSwap', 'RemoveSusPeer', data);
+    return promise.then((data) => Policy.decode(new _m0.Reader(data)));
   }
 
   LiquidGetAddress(request: GetAddressRequest): Promise<GetAddressResponse> {

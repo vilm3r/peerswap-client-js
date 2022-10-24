@@ -1,13 +1,19 @@
-import { AddPeerResponse, ReloadPolicyFileResponse, RemovePeerResponse } from '../proto/ps';
+import { Policy } from '../proto/ps';
 import { promisify } from '../util';
 
-export const reloadPolicyFile = (client: any): Promise<ReloadPolicyFileResponse> =>
-  promisify(client, 'ReloadPolicyFile', {});
+export const reloadPolicyFile = (client: any): Promise<Policy> => promisify(client, 'ReloadPolicyFile', {});
 
-// tslint:disable-next-line
-export const addPeer = (client: any, peer_pubkey: string): Promise<AddPeerResponse> =>
+export const addPeer = (client: any, peer_pubkey: string): Promise<Policy> =>
   promisify(client, 'AddPeer', { peer_pubkey });
 
-// tslint:disable-next-line
-export const removePeer = (client: any, peer_pubkey: string): Promise<RemovePeerResponse> =>
+export const removePeer = (client: any, peer_pubkey: string): Promise<Policy> =>
   promisify(client, 'RemovePeer', { peer_pubkey });
+
+export const allowSwapRequests = (client: any, allow: boolean): Promise<Policy> =>
+  promisify(client, 'AllowSwapRequests', { allow });
+
+export const addSusPeer = (client: any, peer_pubkey: string): Promise<Policy> =>
+  promisify(client, 'AddSusPeer', { peer_pubkey });
+
+export const removeSusPeer = (client: any, peer_pubkey: string): Promise<Policy> =>
+  promisify(client, 'RemoveSusPeer', { peer_pubkey });

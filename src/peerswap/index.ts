@@ -1,6 +1,5 @@
 import {
   AllowSwapRequestsResponse,
-  ListNodesResponse,
   ListPeersResponse,
   ListRequestedSwapsResponse,
   ListSwapsResponse,
@@ -26,17 +25,16 @@ export const swapIn = (
 export const getSwap = (client: GrpcObject, swapId: string): Promise<SwapResponse> =>
   promisify(client, 'GetSwap', { swapId });
 
-export const listSwaps = (client: GrpcObject): Promise<ListSwapsResponse> => promisify(client, 'ListSwaps', {});
+export const listSwaps = (client: GrpcObject): Promise<ListSwapsResponse> => {
+  const test = promisify(client, 'ListSwaps', {});
+  test.then((x) => console.log(x));
+  return test;
+};
 
 export const listPeers = (client: GrpcObject): Promise<ListPeersResponse> => promisify(client, 'ListPeers', {});
-
-export const listNodes = (client: GrpcObject): Promise<ListNodesResponse> => promisify(client, 'ListNodes', {});
 
 export const listRequestedSwaps = (client: GrpcObject): Promise<ListRequestedSwapsResponse> =>
   promisify(client, 'ListRequestedSwaps', {});
 
 export const listActiveSwaps = (client: GrpcObject): Promise<ListSwapsResponse> =>
   promisify(client, 'ListActiveSwaps', {});
-
-export const allowSwapRequests = (client: GrpcObject): Promise<AllowSwapRequestsResponse> =>
-  promisify(client, 'ListSwapRequests', {});
