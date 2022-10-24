@@ -13,14 +13,16 @@ export const swapOut = (
   channelId: number,
   swapAmount: number,
   asset: string,
-): Promise<SwapResponse> => promisify(client, 'SwapOut', { channelId, swapAmount, asset });
+  force: boolean = false,
+): Promise<SwapResponse> => promisify(client, 'SwapOut', { channelId, swapAmount, asset, force });
 
 export const swapIn = (
   client: GrpcObject,
   channelId: number,
   swapAmount: number,
   asset: string,
-): Promise<SwapResponse> => promisify(client, 'SwapIn', { channelId, swapAmount, asset });
+  force: boolean = false,
+): Promise<SwapResponse> => promisify(client, 'SwapIn', { channelId, swapAmount, asset, force });
 
 export const getSwap = (client: GrpcObject, swapId: string): Promise<SwapResponse> =>
   promisify(client, 'GetSwap', { swapId });
